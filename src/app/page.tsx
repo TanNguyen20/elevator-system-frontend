@@ -25,10 +25,10 @@ export default function ElevatorSystem() {
     console.log(messages);
   }, [messages]);
 
-  const requestMove = (direction: string) => {
-    console.log(`Requesting to move ${direction}`);
-    // Send WebSocket request to move elevator
-  };
+  // const requestMove = (direction: string) => {
+  //   console.log(`Requesting to move ${direction}`);
+  //   // Send WebSocket request to move elevator
+  // };
 
   const controlElevator = (id: number, action: string) => {
     const floor = parseInt(floorInputs[id], 10);
