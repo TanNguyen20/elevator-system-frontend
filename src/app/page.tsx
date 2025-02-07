@@ -12,6 +12,7 @@ export default function ElevatorSystem() {
   const [elevators, setElevators] = useState(
     Array(ELEVATORS).fill({ currentFloor: 1, doorsOpen: false })
   );
+  const [floorInputs, setFloorInputs] = useState(Array(ELEVATORS).fill(""));
 
   useEffect(() => {
     const socket = new SockJS("http://localhost:8080/ws");
@@ -28,50 +29,58 @@ export default function ElevatorSystem() {
     };
   }, []);
 
-  const requestMove = (direction: string) => {
+  const requestMove = (direction) => {
     console.log(`Requesting to move ${direction}`);
     // Send WebSocket request to move elevator
   };
 
-  const controlElevator = (floor: number, action: string) => {
-    console.log(`Floor ${floor}: ${action}`);
-    // Send WebSocket request to control elevator at floor
+  const controlElevator = (index, action) => {
+    const floor = parseInt(floorInputs[index], 10);
+    if (!isNaN(floor) && floor >= 1 && floor <= FLOORS) {
+      console.log(`Floor ${floor}: ${action}`);
+      // Send WebSocket request to control elevator at floor
+    } else {
+      console.warn("Invalid floor input");
+    }
+  };
+
+  const handleFloorInputChange = (index, value) => {
+    const newFloorInputs = [...floorInputs];
+    newFloorInputs[index] = value;
+    setFloorInputs(newFloorInputs);
   };
 
   return (
     <div style={{ padding: "16px", width: "55vw" }}>
-      {/* Control Panel for Moving Up and Down */}
-      <Row
-        gutter={[8, 8]}
-        justify="center"
-        style={{ marginBottom: "16px" }}
-      >
+      <Row gutter={[8, 8]} justify="center" style={{ marginBottom: "16px" }}>
         <Button onClick={() => requestMove("UP")}>Move Up</Button>
-        <Button onClick={() => requestMove("DOWN")} style={{ marginLeft: "8px" }}>Move Down</Button>
+        <Button onClick={() => requestMove("DOWN")} style={{ marginLeft: "8px" }}>
+          Move Down
+        </Button>
       </Row>
 
-      <Row
-        gutter={[8, 8]}
-        justify="center"
-        style={{ marginBottom: "16px" }}
-      >
-        <Col span={5} style={{ display: "flex" }}>
-            <Input style={{marginRight: 8}} type="number" max={10} min={1} placeholder="Floor" />
-            <Button onClick={() => controlElevator(1, "CHOOSE_FLOOR")} >Choose Floor</Button>
-        </Col>
-        <Col span={5} style={{ display: "flex" }}>
-            <Input style={{marginRight: 8}} type="number" max={10} min={1} placeholder="Floor" />
-            <Button onClick={() => controlElevator(1, "CHOOSE_FLOOR")} >Choose Floor</Button>
-        </Col>
-        <Col span={5} style={{ display: "flex" }}>
-            <Input style={{marginRight: 8}} type="number" max={10} min={1} placeholder="Floor" />
-            <Button onClick={() => controlElevator(1, "CHOOSE_FLOOR")} >Choose Floor</Button>
-        </Col>
+      <Row gutter={[8, 8]} justify="center" style={{ marginBottom: "16px" }}>
+        {Array.from({ length: ELEVATORS }).map((_, index) => (
+          <Col key={index} span={5} style={{ display: "flex" }}>
+            <Input
+              style={{ marginRight: 8 }}
+              type="number"
+              max={10}
+              min={1}
+              placeholder="Floor"
+              value={floorInputs[index]}
+              onChange={(e) => handleFloorInputChange(index, e.target.value)}
+            />
+            <Button onClick={() => controlElevator(index, "CHOOSE_FLOOR")}>
+              Choose Floor
+            </Button>
+          </Col>
+        ))}
         <Col span={9} style={{ display: "flex" }}>
-            <div></div>
+          <div></div>
         </Col>
       </Row>
-      
+
       {Array.from({ length: FLOORS }, (_, floor) => (
         <Row
           key={floor}
@@ -88,9 +97,10 @@ export default function ElevatorSystem() {
               <span style={{ fontSize: "12px" }}>Floor {FLOORS - floor}</span>
             </Col>
           ))}
-          {/* Control Panel for Each Floor */}
           <Col span={9} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Button style={{marginRight: 8}} onClick={() => controlElevator(FLOORS - floor, "DOOR_OPEN")}>Open Door</Button>
+            <Button style={{ marginRight: 8 }} onClick={() => controlElevator(FLOORS - floor, "DOOR_OPEN")}>
+              Open Door
+            </Button>
             <Button onClick={() => controlElevator(FLOORS - floor, "DOOR_CLOSE")}>Close Door</Button>
           </Col>
         </Row>
