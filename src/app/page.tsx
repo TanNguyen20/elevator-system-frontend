@@ -1,3 +1,5 @@
+"use client"
+
 import { useState } from "react";
 import { Row, Col, Button, Input } from "antd";
 import { useWebSocket } from "./hooks/useWebSocket";
