@@ -1,71 +1,88 @@
-import axios from "axios";
+import { useEffect, useState } from "react";
+import SockJS from "sockjs-client";
+import { Stomp } from "@stomp/stompjs";
+import { Row, Col, Button, Input } from "antd";
 
-type ElevatorProps = {
-  elevator: {
-    id: number;
-    currentFloor: number;
-    state: "IDLE" | "MOVING";
-    direction: "UP" | "DOWN" | "NONE";
-    doorState: "OPEN" | "CLOSED";
+const ELEVATORS = 3;
+const FLOORS = 10;
+
+export default function ElevatorSystem() {
+  const [elevators, setElevators] = useState(
+    Array(ELEVATORS).fill({ currentFloor: 1, doorsOpen: false })
+  );
+
+  useEffect(() => {
+    const socket = new SockJS("http://localhost:8080/ws");
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+      stompClient.subscribe("/topic/elevator/status", (message) => {
+        setElevators(JSON.parse(message.body));
+      });
+    });
+
+    return () => {
+      stompClient.disconnect();
+    };
+  }, []);
+
+  const requestMove = (direction) => {
+    console.log(`Requesting to move ${direction}`);
+    // Send WebSocket request to move elevator
   };
-  refresh: () => void;
-};
 
-export default function Elevator({ elevator, refresh }: ElevatorProps) {
-  const floors = Array.from({ length: 10 }, (_, i) => 10 - i);
-
-  const moveElevator = async () => {
-    try {
-      await axios.post(`http://localhost:8080/api/elevators/${elevator.id}/move`);
-      refresh();
-    } catch (error) {
-      console.error("Error moving elevator:", error);
-    }
-  };
-
-  const openDoor = async () => {
-    try {
-      await axios.post(`http://localhost:8080/api/elevators/${elevator.id}/door/open`);
-      refresh();
-    } catch (error) {
-      console.error("Error opening door:", error);
-    }
-  };
-
-  const closeDoor = async () => {
-    try {
-      await axios.post(`http://localhost:8080/api/elevators/${elevator.id}/door/close`);
-      refresh();
-    } catch (error) {
-      console.error("Error closing door:", error);
-    }
+  const controlElevator = (floor, action) => {
+    console.log(`Floor ${floor}: ${action}`);
+    // Send WebSocket request to control elevator at floor
   };
 
   return (
-    <div className="flex flex-col items-center gap-2 p-4 border border-gray-400 rounded-md bg-white">
-      <h2 className="font-bold text-lg">Elevator {elevator.id}</h2>
-      <div className="relative w-20 h-[300px] border border-gray-700 bg-gray-200 flex flex-col-reverse">
-        {floors.map((floor) => (
-          <div
-            key={floor}
-            className={`h-[10%] flex items-center justify-center border-t text-sm ${
-              elevator.currentFloor === floor ? "bg-blue-500 text-white font-bold" : ""
-            }`}
-          >
-            {floor}
-          </div>
-        ))}
-      </div>
-      <p>Status: {elevator.state}</p>
-      <p>Direction: {elevator.direction}</p>
-      <p>Doors: {elevator.doorState}</p>
-      <div className="flex gap-2">
-        <button onClick={openDoor} className="px-3 py-1 bg-green-500 text-white rounded-md">Open</button>
-        <button onClick={closeDoor} className="px-3 py-1 bg-red-500 text-white rounded-md">Close</button>
-      </div>
-      <button onClick={moveElevator} className="px-3 py-1 bg-gray-300 rounded-md">
-        Move
-      </button>
+    <div style={{ padding: "16px", width: "55vw" }}>
+      {/* Control Panel for Moving Up and Down */}
+      <Row
+        gutter={[8, 8]}
+        justify="center"
+        style={{ marginBottom: "16px" }}
+      >
+        <Button onClick={() => requestMove("UP")}>Move Up</Button>
+        <Button onClick={() => requestMove("DOWN")} style={{ marginLeft: "8px" }}>Move Down</Button>
+      </Row>
+      
+      {Array.from({ length: FLOORS }, (_, floor) => (
+        <Row
+          key={floor}
+          gutter={[8, 8]}
+          align="middle"
+          justify="center"
+          style={{ borderBottom: "1px solid #ddd", padding: "8px" }}
+        >
+          {elevators.map((elevator, index) => (
+            <Col key={index} span={4} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              {elevator.currentFloor === FLOORS - floor && (
+                <div style={{ backgroundColor: "#1E3A8A", width: "32px", height: "32px", borderRadius: "50%" }} />
+              )}
+              <span style={{ fontSize: "12px" }}>Floor {FLOORS - floor}</span>
+            </Col>
+          ))}
+          {/* Control Panel for Each Floor */}
+          <Col span={12} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between" }}>
+            <Row
+                gutter={[8, 8]}
+                align="middle"
+                justify="center"
+                >
+                <Col span={12} style={{ display: "flex"}}>
+                    <Button onClick={() => controlElevator(FLOORS - floor, "DOOR_OPEN")}>Open Door</Button>
+                    <Button onClick={() => controlElevator(FLOORS - floor, "DOOR_CLOSE")}>Close Door</Button>
+                </Col>
+                <Col span={12} style={{ display: "flex" }}>
+                    <Input type="number" max={10} min={1} placeholder="Floor" />
+                    <Button onClick={() => controlElevator(FLOORS - floor, "CHOOSE_FLOOR")} >Choose Floor</Button>
+                </Col>
+            </Row>
+          </Col>
+        </Row>
+      ))}
     </div>
   );
 }
