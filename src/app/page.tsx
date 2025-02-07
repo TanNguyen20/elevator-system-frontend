@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Row, Col, Button, Input } from "antd";
-import { useWebSocket } from "./useWebSocket";
+import { useWebSocket } from "./hooks/useWebSocket";
 
 const ELEVATORS = 3;
 const FLOORS = 10;
