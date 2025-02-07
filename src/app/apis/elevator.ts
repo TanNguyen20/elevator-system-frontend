@@ -2,7 +2,7 @@ import {Elevator} from "@/app/types/elevator";
 
 const BASE_URL = "http://localhost:8080/api/elevators";
 
-export const getElevators = async (): Promise<Elevator[]> => {
+export const getElevators = async (): Promise<Array<Elevator>> => {
     const res = await fetch(BASE_URL);
     return res.json();
 };

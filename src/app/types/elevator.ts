@@ -1,7 +1,7 @@
 export enum ElevatorStatus {
-    MOVING_UP = "MOVING_UP",
-    MOVING_DOWN = "MOVING_DOWN",
     IDLE = "IDLE",
+    MOVING = "MOVING",
+    STOPPED = "STOPPED",
 }
 
 export enum ElevatorDirection {
@@ -10,10 +10,15 @@ export enum ElevatorDirection {
     NONE = "NONE",
 }
 
+export enum ElevatorDoor {
+    OPEN = "OPEN",
+    CLOSED = "CLOSED",
+}
+
 export interface Elevator {
     id: number;
     currentFloor: number;
-    status: ElevatorStatus;
+    state: ElevatorStatus;
     direction: ElevatorDirection;
     doorsOpen: boolean;
 }
