@@ -7,14 +7,14 @@ export const getElevators = async (): Promise<Array<Elevator>> => {
     return res.json();
 };
 
-export const sendElevator = async (id: number, floor: number) => {
-    await fetch(`${BASE_URL}/${id}/send?floor=${floor}`, { method: "POST" });
+export const sendElevator = async (elevatorId: number, floor: number) => {
+    await fetch(`${BASE_URL}/${elevatorId}/send?floor=${floor}`, { method: "POST" });
 };
 
-export const openDoors = async (id: number) => {
-    await fetch(`${BASE_URL}/${id}/open`, { method: "POST" });
+export const openDoors = async (elevatorId: number) => {
+    await fetch(`${BASE_URL}/${elevatorId}/open`, { method: "POST" });
 };
 
-export const closeDoors = async (id: number) => {
-    await fetch(`${BASE_URL}/${id}/close`, { method: "POST" });
+export const closeDoors = async (elevatorId: number) => {
+    await fetch(`${BASE_URL}/${elevatorId}/close`, { method: "POST" });
 };
