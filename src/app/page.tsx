@@ -1,3 +1,5 @@
+"use client"
+
 import { useEffect, useState } from "react";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
@@ -26,12 +28,12 @@ export default function ElevatorSystem() {
     };
   }, []);
 
-  const requestMove = (direction) => {
+  const requestMove = (direction: string) => {
     console.log(`Requesting to move ${direction}`);
     // Send WebSocket request to move elevator
   };
 
-  const controlElevator = (floor, action) => {
+  const controlElevator = (floor: number, action: string) => {
     console.log(`Floor ${floor}: ${action}`);
     // Send WebSocket request to control elevator at floor
   };
@@ -47,6 +49,28 @@ export default function ElevatorSystem() {
         <Button onClick={() => requestMove("UP")}>Move Up</Button>
         <Button onClick={() => requestMove("DOWN")} style={{ marginLeft: "8px" }}>Move Down</Button>
       </Row>
+
+      <Row
+        gutter={[8, 8]}
+        justify="center"
+        style={{ marginBottom: "16px" }}
+      >
+        <Col span={5} style={{ display: "flex" }}>
+            <Input style={{marginRight: 8}} type="number" max={10} min={1} placeholder="Floor" />
+            <Button onClick={() => controlElevator(1, "CHOOSE_FLOOR")} >Choose Floor</Button>
+        </Col>
+        <Col span={5} style={{ display: "flex" }}>
+            <Input style={{marginRight: 8}} type="number" max={10} min={1} placeholder="Floor" />
+            <Button onClick={() => controlElevator(1, "CHOOSE_FLOOR")} >Choose Floor</Button>
+        </Col>
+        <Col span={5} style={{ display: "flex" }}>
+            <Input style={{marginRight: 8}} type="number" max={10} min={1} placeholder="Floor" />
+            <Button onClick={() => controlElevator(1, "CHOOSE_FLOOR")} >Choose Floor</Button>
+        </Col>
+        <Col span={9} style={{ display: "flex" }}>
+            <div></div>
+        </Col>
+      </Row>
       
       {Array.from({ length: FLOORS }, (_, floor) => (
         <Row
@@ -57,7 +81,7 @@ export default function ElevatorSystem() {
           style={{ borderBottom: "1px solid #ddd", padding: "8px" }}
         >
           {elevators.map((elevator, index) => (
-            <Col key={index} span={4} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <Col key={index} span={5} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               {elevator.currentFloor === FLOORS - floor && (
                 <div style={{ backgroundColor: "#1E3A8A", width: "32px", height: "32px", borderRadius: "50%" }} />
               )}
@@ -65,21 +89,9 @@ export default function ElevatorSystem() {
             </Col>
           ))}
           {/* Control Panel for Each Floor */}
-          <Col span={12} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between" }}>
-            <Row
-                gutter={[8, 8]}
-                align="middle"
-                justify="center"
-                >
-                <Col span={12} style={{ display: "flex"}}>
-                    <Button onClick={() => controlElevator(FLOORS - floor, "DOOR_OPEN")}>Open Door</Button>
-                    <Button onClick={() => controlElevator(FLOORS - floor, "DOOR_CLOSE")}>Close Door</Button>
-                </Col>
-                <Col span={12} style={{ display: "flex" }}>
-                    <Input type="number" max={10} min={1} placeholder="Floor" />
-                    <Button onClick={() => controlElevator(FLOORS - floor, "CHOOSE_FLOOR")} >Choose Floor</Button>
-                </Col>
-            </Row>
+          <Col span={9} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Button style={{marginRight: 8}} onClick={() => controlElevator(FLOORS - floor, "DOOR_OPEN")}>Open Door</Button>
+            <Button onClick={() => controlElevator(FLOORS - floor, "DOOR_CLOSE")}>Close Door</Button>
           </Col>
         </Row>
       ))}
