@@ -12,9 +12,9 @@ export const sendElevator = async (elevatorId: number, floor: number) => {
 };
 
 export const openDoor = async (elevatorId: number) => {
-    await fetch(`${BASE_URL}/${elevatorId}/open`, { method: "POST" });
+    await fetch(`${BASE_URL}/${elevatorId}/door/open`, { method: "POST" });
 };
 
 export const closeDoor = async (elevatorId: number) => {
-    await fetch(`${BASE_URL}/${elevatorId}/close`, { method: "POST" });
+    await fetch(`${BASE_URL}/${elevatorId}/door/close`, { method: "POST" });
 };
