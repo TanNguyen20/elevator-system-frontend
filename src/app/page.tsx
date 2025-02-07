@@ -1,40 +1,23 @@
-"use client"
-
-import { useEffect, useState } from "react";
-import SockJS from "sockjs-client";
-import { Stomp } from "@stomp/stompjs";
+import { useState } from "react";
 import { Row, Col, Button, Input } from "antd";
+import { useWebSocket } from "./useWebSocket";
 
 const ELEVATORS = 3;
 const FLOORS = 10;
 
 export default function ElevatorSystem() {
-  const [elevators, setElevators] = useState(
+  const [elevators, ] = useState(
     Array(ELEVATORS).fill({ currentFloor: 1, doorsOpen: false })
   );
   const [floorInputs, setFloorInputs] = useState(Array(ELEVATORS).fill(""));
+  const { messages, sendMessage } = useWebSocket();
 
-  useEffect(() => {
-    const socket = new SockJS("http://localhost:8080/ws");
-    const stompClient = Stomp.over(socket);
-
-    stompClient.connect({}, () => {
-      stompClient.subscribe("/topic/elevator/status", (message) => {
-        setElevators(JSON.parse(message.body));
-      });
-    });
-
-    return () => {
-      stompClient.disconnect();
-    };
-  }, []);
-
-  const requestMove = (direction) => {
+  const requestMove = (direction: string) => {
     console.log(`Requesting to move ${direction}`);
     // Send WebSocket request to move elevator
   };
 
-  const controlElevator = (index, action) => {
+  const controlElevator = (index: number, action: string) => {
     const floor = parseInt(floorInputs[index], 10);
     if (!isNaN(floor) && floor >= 1 && floor <= FLOORS) {
       console.log(`Floor ${floor}: ${action}`);
@@ -44,7 +27,7 @@ export default function ElevatorSystem() {
     }
   };
 
-  const handleFloorInputChange = (index, value) => {
+  const handleFloorInputChange = (index: number, value: string) => {
     const newFloorInputs = [...floorInputs];
     newFloorInputs[index] = value;
     setFloorInputs(newFloorInputs);
