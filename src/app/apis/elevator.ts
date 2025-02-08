@@ -1,4 +1,4 @@
-import {Elevator} from "@/app/types/elevator";
+import {Elevator, ElevatorDirection} from "@/app/types/elevator";
 
 const BASE_URL = "http://localhost:8080/api/elevators";
 
@@ -7,8 +7,8 @@ export const getElevators = async (): Promise<Array<Elevator>> => {
     return res.json();
 };
 
-export const sendElevator = async (elevatorId: number, floor: number) => {
-    await fetch(`${BASE_URL}/${elevatorId}/send?floor=${floor}`, { method: "POST" });
+export const requestElevator = async (floor: number, direction: ElevatorDirection) => {
+    await fetch(`${BASE_URL}/request?direction=${direction}&floor=${floor}`, { method: "POST" });
 };
 
 export const openDoor = async (elevatorId: number) => {

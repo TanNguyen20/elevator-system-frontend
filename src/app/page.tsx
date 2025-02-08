@@ -1,10 +1,10 @@
 "use client";
 
 import {useEffect, useState} from "react";
-import {Row, Col, Button, Input} from "antd";
+import {Button, Col, Input, Row, Typography} from "antd";
 import {useWebSocket} from "./hooks/useWebSocket";
-import {closeDoor, getElevators, openDoor} from "@/app/apis/elevator";
-import {Elevator} from "@/app/types/elevator";
+import {closeDoor, getElevators, openDoor, requestElevator} from "@/app/apis/elevator";
+import {Elevator, ElevatorDirection} from "@/app/types/elevator";
 
 const FLOORS = 10;
 
@@ -15,20 +15,24 @@ export default function ElevatorSystem() {
 
     useEffect(() => {
         getElevators().then(res => {
-            console.log(res)
             setElevators(res)
         })
         sendMessage("hello");
     }, []);
 
     useEffect(() => {
-        console.log(messages);
-    }, [messages]);
-
-    // const requestMove = (direction: string) => {
-    //   console.log(`Requesting to move ${direction}`);
-    //   // Send WebSocket request to move elevator
-    // };
+        if(messages.length > 0) {
+            const elevatorUpdate: Elevator = JSON.parse(messages[messages.length - 1])
+            const currentElevators = [...elevators]
+            const newElevators = currentElevators.map((elevator) => {
+                if(elevator.id === elevatorUpdate.id) {
+                    return elevatorUpdate;
+                }
+                return elevator;
+            })
+            setElevators((newElevators))
+        }
+    }, [JSON.stringify(messages)]);
 
     const controlElevator = (id: number, action: string) => {
         const floor = parseInt(floorInputs[id], 10);
@@ -48,19 +52,9 @@ export default function ElevatorSystem() {
 
     return (
         <div className="p-4 w-auto">
-            <Row gutter={[8, 8]} justify="center" className="mb-4">
-                <Button
-                    onClick={() => sendMessage("hello")}
-                >
-                    Move Up
-                </Button>
-                <Button
-                    onClick={() => sendMessage("hello")}
-                    className="ml-2"
-                >
-                    Move Down
-                </Button>
-            </Row>
+            <Typography.Title className="text-center" level={1}>
+                Elevator System UI
+            </Typography.Title>
 
             <Row
                 gutter={[8, 8]}
@@ -68,25 +62,40 @@ export default function ElevatorSystem() {
                 justify="center"
             >
                 {elevators.map((elevator, index) => (
-                    <Col key={elevator.id} span={5} className="flex">
-                        <Input
-                            className="mr-2"
-                            type="number"
-                            max={10}
-                            min={1}
-                            placeholder="Floor"
-                            value={floorInputs[index]}
-                            onChange={(e) => handleFloorInputChange(index, e.target.value)}
-                        />
-                        <Button
-                            className="mr-3"
-                            onClick={() => controlElevator(elevator.id, "CHOOSE_FLOOR")}
-                        >
-                            Choose Floor
-                        </Button>
+                    <Col key={elevator.id} span={6} className="flex-row">
+                        <div className="flex mb-2">
+                            <Input
+                                className="mr-2 "
+                                type="number"
+                                max={10}
+                                min={1}
+                                placeholder="Floor"
+                                value={floorInputs[index]}
+                                onChange={(e) => handleFloorInputChange(index, e.target.value)}
+                            />
+                            <Button
+                                className="mr-3"
+                                onClick={() => controlElevator(elevator.id, "CHOOSE_FLOOR")}
+                            >
+                                Go to
+                            </Button>
+                        </div>
+                        <div className="flex">
+                            <Button
+                                className="mr-2"
+                                onClick={() => openDoor(elevator.id)}
+                            >
+                                Open Door
+                            </Button>
+                            <Button
+                                onClick={() => closeDoor(elevator.id)}
+                            >
+                                Close Door
+                            </Button>
+                        </div>
                     </Col>
                 ))}
-                <Col span={9}>
+                <Col span={6}>
                     <div></div>
                 </Col>
             </Row>
@@ -101,7 +110,7 @@ export default function ElevatorSystem() {
                     style={{borderBottom: "1px solid #ddd"}}
                 >
                     {elevators.map((elevator) => (
-                        <Col key={elevator.id} span={5}
+                        <Col key={elevator.id} span={6}
                              className="flex flex-col items-center">
                             {elevator.currentFloor === FLOORS - floor && (
                                 <div className="bg-[#1E3A8A] w-8 h-8 rounded-[50%]"/>
@@ -109,17 +118,17 @@ export default function ElevatorSystem() {
                             <span className="text-[12px]">Floor {FLOORS - floor}</span>
                         </Col>
                     ))}
-                    <Col span={9} className="flex justify-center items-center">
+                    <Col span={6}>
                         <Button
-                            className="mr-2"
-                            onClick={() => openDoor(1)}
+                            onClick={() => requestElevator(floor, ElevatorDirection.UP)}
                         >
-                            Open Door
+                            Move Up
                         </Button>
                         <Button
-                            onClick={() => closeDoor(1)}
+                            onClick={() => requestElevator(floor, ElevatorDirection.DOWN)}
+                            className="ml-2"
                         >
-                            Close Door
+                            Move Down
                         </Button>
                     </Col>
                 </Row>
