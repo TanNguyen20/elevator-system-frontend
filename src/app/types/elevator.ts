@@ -20,5 +20,5 @@ export interface Elevator {
     currentFloor: number;
     state: ElevatorStatus;
     direction: ElevatorDirection;
-    doorsOpen: boolean;
+    doorState: ElevatorDoor;
 }

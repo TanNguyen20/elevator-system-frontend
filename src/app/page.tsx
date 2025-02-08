@@ -3,14 +3,14 @@
 import {useEffect, useState} from "react";
 import {Button, Col, Input, Row, Typography} from "antd";
 import {useWebSocket} from "./hooks/useWebSocket";
-import {closeDoor, getElevators, openDoor, requestElevator} from "@/app/apis/elevator";
-import {Elevator, ElevatorDirection} from "@/app/types/elevator";
+import {closeDoor, getElevators, goToFloor, openDoor, requestElevator} from "@/app/apis/elevator";
+import {Elevator, ElevatorDirection, ElevatorDoor} from "@/app/types/elevator";
 
 const FLOORS = 10;
 
 export default function ElevatorSystem() {
     const [elevators, setElevators] = useState<Array<Elevator>>([]);
-    const [floorInputs, setFloorInputs] = useState<string[]>([]);
+    const [floorInputs, setFloorInputs] = useState<number[]>([]);
     const {messages, sendMessage} = useWebSocket();
 
     useEffect(() => {
@@ -34,19 +34,9 @@ export default function ElevatorSystem() {
         }
     }, [JSON.stringify(messages)]);
 
-    const controlElevator = (id: number, action: string) => {
-        const floor = parseInt(floorInputs[id], 10);
-        if (!isNaN(floor) && floor >= 1 && floor <= FLOORS) {
-            console.log(`Elevator ${id} -> Floor ${floor}: ${action}`);
-            // Send WebSocket or API request to control the elevator
-        } else {
-            console.warn("Invalid floor input");
-        }
-    };
-
     const handleFloorInputChange = (index: number, value: string) => {
         const newFloorInputs = [...floorInputs];
-        newFloorInputs[index] = value;
+        newFloorInputs[index] = parseInt(value);
         setFloorInputs(newFloorInputs);
     };
 
@@ -75,7 +65,7 @@ export default function ElevatorSystem() {
                             />
                             <Button
                                 className="mr-3"
-                                onClick={() => controlElevator(elevator.id, "CHOOSE_FLOOR")}
+                                onClick={() => goToFloor(elevator.id, floorInputs[index])}
                             >
                                 Go to
                             </Button>
@@ -100,39 +90,41 @@ export default function ElevatorSystem() {
                 </Col>
             </Row>
 
-            {Array.from({length: FLOORS}, (_, floor) => (
-                <Row
-                    key={floor}
-                    gutter={[8, 8]}
-                    align="middle"
-                    justify="center"
-                    className="p-2"
-                    style={{borderBottom: "1px solid #ddd"}}
-                >
-                    {elevators.map((elevator) => (
-                        <Col key={elevator.id} span={6}
-                             className="flex flex-col items-center">
-                            {elevator.currentFloor === FLOORS - floor && (
-                                <div className="bg-[#1E3A8A] w-8 h-8 rounded-[50%]"/>
-                            )}
-                            <span className="text-[12px]">Floor {FLOORS - floor}</span>
+            {Array.from({length: FLOORS}, (_, floor) => {
+                return (
+                    <Row
+                        key={floor}
+                        gutter={[8, 8]}
+                        align="middle"
+                        justify="center"
+                        className="p-2"
+                        style={{borderBottom: "1px solid #ddd"}}
+                    >
+                        {elevators.map((elevator) => (
+                            <Col key={elevator.id} span={6}
+                                 className="flex flex-col items-center">
+                                {elevator.currentFloor === FLOORS - floor && (
+                                    <div className={`${elevator.doorState === ElevatorDoor.CLOSED ? "bg-[#1E3A8A]" : "bg-red-600"} w-8 h-8 rounded-[50%]`}/>
+                                )}
+                                <span className="text-[12px]">Floor {FLOORS - floor}</span>
+                            </Col>
+                        ))}
+                        <Col span={6}>
+                            <Button
+                                onClick={() => requestElevator(FLOORS - floor, ElevatorDirection.UP)}
+                            >
+                                Move Up
+                            </Button>
+                            <Button
+                                onClick={() => requestElevator(FLOORS - floor, ElevatorDirection.DOWN)}
+                                className="ml-2"
+                            >
+                                Move Down
+                            </Button>
                         </Col>
-                    ))}
-                    <Col span={6}>
-                        <Button
-                            onClick={() => requestElevator(floor, ElevatorDirection.UP)}
-                        >
-                            Move Up
-                        </Button>
-                        <Button
-                            onClick={() => requestElevator(floor, ElevatorDirection.DOWN)}
-                            className="ml-2"
-                        >
-                            Move Down
-                        </Button>
-                    </Col>
-                </Row>
-            ))}
+                    </Row>
+                )
+            })}
         </div>
     );
 }

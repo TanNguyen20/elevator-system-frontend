@@ -11,6 +11,10 @@ export const requestElevator = async (floor: number, direction: ElevatorDirectio
     await fetch(`${BASE_URL}/request?direction=${direction}&floor=${floor}`, { method: "POST" });
 };
 
+export const goToFloor = async (elevatorId: number, floor: number) => {
+    await fetch(`${BASE_URL}/${elevatorId}/goto/${floor}`, { method: "POST" });
+};
+
 export const openDoor = async (elevatorId: number) => {
     await fetch(`${BASE_URL}/${elevatorId}/door/open`, { method: "POST" });
 };
