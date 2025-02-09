@@ -1,6 +1,6 @@
 import {Elevator, ElevatorDirection} from "@/app/types/elevator";
 
-const BASE_URL = "http://localhost:8080/api/elevators";
+const BASE_URL = `${process.env.NEXT_PUBLIC_ELEVATOR_SERVER_HOST}/api/elevators`;
 
 export const getElevators = async (): Promise<Array<Elevator>> => {
     const res = await fetch(BASE_URL);

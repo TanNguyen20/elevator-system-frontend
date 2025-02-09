@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 
-const WEBSOCKET_URL = "ws://localhost:8080/ws";
+const WEBSOCKET_URL = `${process.env.NEXT_PUBLIC_ELEVATOR_WEBSOCKET_SERVER_HOST}/ws`;
 
 export const useWebSocket = () => {
     const [messages, setMessages] = useState<string[]>([]);
