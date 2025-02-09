@@ -11,13 +11,12 @@ const FLOORS = 10;
 export default function ElevatorSystem() {
     const [elevators, setElevators] = useState<Array<Elevator>>([]);
     const [floorInputs, setFloorInputs] = useState<number[]>([]);
-    const {messages, sendMessage} = useWebSocket();
+    const { messages } = useWebSocket();
 
     useEffect(() => {
         getElevators().then(res => {
             setElevators(res)
         })
-        sendMessage("hello");
     }, []);
 
     useEffect(() => {
@@ -125,6 +124,15 @@ export default function ElevatorSystem() {
                     </Row>
                 )
             })}
+            <div className="flex justify-center items-center mt-2">
+                <div className="flex items-center mr-4">
+                    <div className="mr-2">Door OPEN: </div>
+                    <div className="bg-red-600 w-8 h-8 rounded-[50%]"/>
+                </div>
+                <div className="flex items-center">
+                    <div className="mr-2">Door CLOSED: </div>
+                    <div className="bg-[#1E3A8A]  w-8 h-8 rounded-[50%]"/></div>
+            </div>
         </div>
     );
 }
